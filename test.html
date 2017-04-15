@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body {
+            height: 8888px;
+        }
+        
+        #box {
+            width: 100px;
+            height: 100px;
+            background: red;
+        }
+        
+        #parent {
+            height: 400px;
+            width: 500px;
+            background: green;
+            padding: 40px;
+            position: absolute;
+        }
+        
+        #child {
+            height: 200px;
+            width: 200px;
+            background: yellow;
+            margin: 100px;
+            position: absolute;
+        }
+        
+        #grandson {
+            height: 50px;
+            width: 50px;
+            background: red;
+            margin: 30px;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <form onsubmit="alert(111)">
+        <input id='mail' type="text">
+        <input id='sendMail' type="button" value="发送">
+    </form>
+    <button id="btn1">添加li</button>
+    <button id="btn2">删除li</button>
+    <ul id="ul">
+        <li>1</li>
+        <li>
+            <p>1111</p>
+        </li>
+        <li class="aa current">3</li>
+        <li>4</li>
+        <li class="current">5</li>
+        <li><span>assfd</span></li>
+    </ul>
+    <div id="box"></div>
+    <input id='btn' type="button" value="click">
+
+
+
+
+    <div id="container" class="box0">
+        <div class="box1">
+            <p>hhh</p>
+            <p class="pp">hhh</p>
+            <p>
+                <span>hhh</span>
+            </p>
+        </div>
+        <div class="box1">
+            <p>123</p>
+            <p>
+                <span class="aa">aaaa</span>
+            </p>
+            <p class="pp">
+                <a href="#"></a>
+            </p>
+        </div>
+    </div>
+
+    <div id="parent">
+        <div id="child">
+            <div id="grandson"></div>
+        </div>
+    </div>
+    <script src="./lucky_module.js"></script>
+    <script>
+        function equalN(arr, target) {
+
+
+        }
+
+        function show(context) {
+            $$.css(context, 'display', 'block');
+        }
+
+        function hide(context) {
+            $$.css(context, 'display', 'none');
+        }
+        //  元素的绝对位置：指该元素的左上角相对于整张网页左上角的坐标。这个绝对位置要通过计算才能得到。
+        //  首先，每个元素都有offsetTop和offsetLeft属性，表示该元素的左上角与父容器（offsetParent对象）左上角的距离。
+        //  所以，只需要将这两个值进行累加，就可以得到该元素的绝对坐标。
+
+        //实现原理
+        //在阅读javascript高级程序设计第三版DOM部分时，
+        //了解到要获取某个元素在页面上的偏移量，
+        //需要将这个元素的offsetLeft和offsetTop与其offsetParent的相同属性相加，一直循环直至根元素。
+        //所以，要得到元素到文档区域的坐标位置，
+        //只需通过while循环不断获取offsetParent的offsetLeft/offsetTop直到offsetParent = null为止。
+        function absoluteOffset(id) {
+            function absoluteLeft(id) {
+                let left = $$.offset(id).left;
+                let parent = id.offsetParent;
+                while (parent) {
+                    left += $$.offset(parent).left;
+                    parent = parent.offsetParent;
+                }
+                return left;
+            }
+
+            function absoluteTop(id) {
+                let top = $$.offset(id).top;
+                let parent = id.offsetParent;
+                while (parent) {
+                    top += $$.offset(parent).top;
+                    parent = parent.offsetParent;
+                }
+                return top;
+            }
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return {
+                left: absoluteLeft(id),
+                top: absoluteTop(id)
+            }
+        }
+
+        // 相对于定位的父盒子
+        // 元素的相对位置：每个元素都有offsetTop和offsetLeft属性，
+        // 表示该元素的左上角与父容器（offsetParent对象）左上角的距离
+        function offset(id) {
+            function offsetLeft(id) {
+                return id.offsetLeft;
+            }
+
+            function offsetTop(id) {
+                return id.offsetTop;
+            }
+
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return {
+                left: offsetLeft(id),
+                top: offsetTop(id)
+            }
+        }
+
+        // 屏幕宽高
+
+        // 元素高度宽度概述
+        // 计算方式：clientHeight clientWidth innerWidth innerHeight
+        // 元素的实际高度+border，也不包含滚动条
+        function offsetWidth(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.offsetWidth;
+        }
+
+        function offsetHeight(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.offsetHeight;
+        }
+
+        // 元素的实际高度 + border， 也不包含滚动条
+        function clientWidth(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.clientWidth;
+        }
+
+        function clientHeight(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.clientHeight;
+        }
+
+        //    元素的滚动高度和宽度
+        //    当元素出现滚动条时候，这里的高度有两种：可视区域的高度 实际高度（可视高度+不可见的高度）
+        //    计算方式 scrollwidth
+        function scrollHeight(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.scrollHeight;
+        }
+
+        function scrollWidth(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.scrollWidth;
+        }
+
+        function scrollTop(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.scrollTop;
+        }
+
+        function scrollLeft(id) {
+            id = $$.isString(id) ? $$.$id(id) : id;
+            return id.scrollLeft;
+        }
+
+        // 1. 传递两个参数：获取
+        // 2. 传递三个参数：设置
+        // 各个击破 context字符串和dom都可以
+        function $css(context, key, value) {
+            let doms = $$.isString(context) ? $$.$all(context) : context;
+            // console.log(arguments.callee.length)
+            // console.log(doms.length);
+            if (doms.length) {
+                // 对key进行检测
+                let index = key.indexOf('-');
+                if (index === -1) {
+                    key[index] = '';
+                    key[index + 1].toUpperCase();
+                }
+                // 设置
+                if (value) {
+                    // value == backgroundColor / backgroud-color
+
+                    $setStyle(doms, key, value)
+                }
+                // 获取
+                else {
+                    return $getStyle(doms, key)
+                }
+            }
+        }
+
+        // 原生获取样式，有问题。动态添加的样式，无法获取
+        // 获取样式，默认只能一个一个的设置
+        // 使用：$getStyle($$.$all('ul li.current'), 'color')
+        // $getStyle('#ul li', 'backgroundColor')
+        function $getStyle(context, key) {
+            let doms = $$.isString(context) ? $$.$all(context) : context;
+            // IE
+            if (doms[0].currentStyle) {
+                return doms[0].currentStyle[key];
+            } else {
+                return window.getComputedStyle(doms[0], null)[key];
+            }
+        }
+
+        // $setStyle('ul li', 'border', '1px solid yellow');
+        // 设置样式
+        function $setStyle(context, key, value) {
+            let doms = $$.isString(context) ? $$.$all(context) : context;
+            for (let i = 0, len = doms.length; i < len; i++) {
+                doms[i].style[key] = value;
+            }
+        }
+
+        function forever() {
+            // 动态
+            // var ul = document.getElementsByTagName('ul')[0],
+            //     lis = ul.getElementsByTagName("li");
+            // for (var i = 0, len = lis.length; i < len; i++) {
+            //     // for (var i = 0; i < lis.length; i++) {
+            //     console.log(i);
+            //     ul.appendChild(document.createElement("li"));
+            // }
+
+            var ul = document.querySelectorAll('ul')[0],
+                lis = ul.querySelectorAll("li");
+            for (var i = 0; i < lis.length; i++) {
+                console.log(i);
+                ul.appendChild(document.createElement("li"));
+            }
+        }
+
+        function addBorder() {
+            let elements = $all('.box1 span', 'container');
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].style.border = '1px solid red';
+            }
+        }
+        // 实现全部的选择器功能
+        function $all(selector, id) {
+            if (id) {
+                id = $$.isString(id) ? $$.$id(id) : id;
+                return id.querySelectorAll(selector);
+            } else {
+                return document.querySelectorAll(selector);
+            }
+        }
+
+        // 层次选择器，有问题...
+        function $cengci(select) {
+            //个个击破法则 -- 寻找击破点
+            var sel = $$.trim(select).split(' ');
+            var result = [];
+            var context = [];
+            for (var i = 0, len = sel.length; i < len; i++) {
+                result = [];
+                var item = $$.trim(sel[i]);
+                var first = sel[i].charAt(0)
+                var index = item.indexOf(first)
+                if (first === '#') {
+                    //如果是#，找到该元素，
+                    pushArray([$$.$id(item.slice(index + 1))]);
+                    context = result;
+                } else if (first === '.') {
+                    //如果是.
+                    //如果是.
+                    //找到context中所有的class为【s-1】的元素 --context是个集合
+                    if (context.length) {
+                        for (var j = 0, contextLen = context.length; j < contextLen; j++) {
+                            // $$.$class第二个参数是id，所以这里有问题
+                            pushArray($$.$class(item.slice(index + 1), context[j]));
+                        }
+                    } else {
+                        pushArray($$.$class(item.slice(index + 1)));
+                    }
+                    context = result;
+                } else {
+                    //如果是标签
+                    //遍历父亲，找到父亲中的元素==父亲都存在context中
+                    if (context.length) {
+                        for (var j = 0, contextLen = context.length; j < contextLen; j++) {
+                            pushArray($$.$tag(item, context[j]));
+                        }
+                    } else {
+                        pushArray($$.$tag(item));
+                    }
+                    context = result;
+                }
+            }
+
+            return context;
+
+            //封装重复的代码
+            function pushArray(doms) {
+                for (var j = 0, domlen = doms.length; j < domlen; j++) {
+                    result.push(doms[j])
+                }
+            }
+        }
+
+
+
+
+
+
+        // 层次选择器 -- 管道思想
+        str = '#container .pp span'
+
+        function $ceng(str) {
+            // 各个击破思想
+            let elements = str.split(' ');
+            // 判断当前这个是id/class/tag
+            for (let i = 0; i < elements.length; i++) {
+                let item = elements[i];
+                let first = item[0];
+                let name = item.substr(1);
+                // 分别进行判断
+                if (first === '#') {
+
+                } else if (first === '.') {
+
+                } else {
+
+                }
+            }
+        }
+
+        // 类似jQuery多个标签形式
+        // $(".p1, .p3, #div3").css("border","2px solid red");  
+        function $(str) {
+            // 返回数组
+            let arr = [];
+            // 临时数组
+            let list = [];
+            // 按照格式进行分割，获取所以名字
+            let names = str.split(',');
+            // console.log(names);
+            // 对每个元素名进行判断
+            for (let i = 0; i < names.length; i++) {
+                let item = names[i].trim();
+                let first = item.charAt(0);
+                // 如果首字符是.或者#，去掉
+                // let index = item.indexOf(first)
+                let name = item.substr(1);
+                if (first === '.') {
+                    list = $$.$class(name);
+                    // console.log(list);
+                } else if (first === '#') {
+                    list = [$$.$id(name)];
+                } else {
+                    list = $$.$tag(item);
+                }
+                pushArr(list);
+            }
+            // 返回之前还不能去重呢...
+            // set(arr);
+            return arr;
+
+            // function set(arr) {
+            //     let obj = {};
+            //     for (let i = 0; i < arr.length; i++) {
+            //         obj[arr[i]] = 0;
+            //     }
+            //     return Object.keys(obj);
+            // }
+
+            function pushArr(list) {
+                for (let i = 0; i < list.length; i++) {
+                    arr.push(list[i]);
+                }
+            }
+        }
+
+        // 下面这两种都是兼容的
+        $class('current', 'ul');
+        $class('current');
+        // 参数 classname, id
+        function $class(classname, id) {
+            let arr = [];
+            // 1. 判断id的类型 -- string or dom
+            if ($$.isString(id)) {
+                id = $$.$id(id);
+            }
+            // 2. 根据id是否存在来决定是否缩小范围
+            // 如果id不存在，还是在document层面去遍历
+            if (!id) {
+                id = document;
+            }
+            // getElementsByClassName可以
+            if (id.getElementsByClassName) {
+                return id.getElementsByClassName(classname);
+            } else {
+                // 需要自己遍历
+                let elements = id.getElementsByTagName('*');
+
+                for (let i = 0; i < elements.length; i++) {
+                    let classes = elements[i].className.split(' ');
+                    for (let j = 0; j < classes.length; j++) {
+                        if (classes[j] == classname) {
+                            arr.push(elements[i]);
+                        }
+                    }
+                }
+            }
+            return arr;
+        }
+
+        // un('ul', 'click', clickF);
+
+        function un(id, type, fn) {
+            $$.$id(id).removeEventListener(type, fn, false);
+        }
+
+
+        for (let i = 0; i < $tag('li', 'ul').length; i++) {
+            $tag('li', 'ul')[i].onmouseover = function() {
+                console.log(1111);
+                this.style.background = 'red';
+            }
+        }
+        // console.log($tag('li', 'ul'))
+        // 缩小搜索范围; tag和id
+        function $tag(tag, id) {
+            if (typeof id == 'string') {
+                id = $$.$id(id);
+            }
+            if (id) {
+                return id.getElementsByTagName(tag);
+            } else {
+                return document.getElementsByTagName(tag);
+            }
+        }
+
+        // ajax的XMLHttpRequest异步局部刷新请求
+        function ajax(data) {
+            //data={data:"",dataType:"xml/json",type:"get/post"，url:"",asyn:"true/false",success:function(){},failure:function(){}}
+            //data:{username:123,password:456}
+            //data = 'username=123&password=456';
+
+            // 1. 创建xhr对象，new对象
+            let xhr = null;
+            if (window.XMLHttpRequest) {
+                xhr = new window.XMLHttpRequest();
+            } else {
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            // 2. 处理data准备，之后open操作
+            let url = data.url;
+            let type = data.type == 'get' ? 'get' : 'post';
+            let asyn = data.asyn == 'true' ? 'true' : 'false';
+            if (type == 'get') {
+                url += '?' + data.data;
+            }
+
+            xhr.open(type, url, asyn);
+
+            // 3. 可以send发送了
+            if (type == 'get') {
+                xhr.send(null);
+            } else if (type == 'post') {
+                xhr.setReqestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send(data.data);
+            }
+
+            // 4. onreadystatechange 回调函数
+            xhr.onreadystatechange = function() {
+                if (this.readyStatus == 4) {
+                    if (this.status == 200) {
+                        if (typeof data.success == 'function') {
+                            let d = data.dataType == 'xml' ? xhr.responseXML : xhr.responseText;
+                            success(d);
+                        }
+                    } else {
+                        if (typeof data.failure == 'function') {
+                            data.failure();
+                        }
+                    }
+                }
+            }
+        }
+
+        // 手写jsonp实现
+        function jsonp(url, data, fn) {
+            // 生成jsonp的callback函数
+            let jsonpCb = 'jsonpCb_' + Math.random().toString().substr(2);
+            console.log(jsonpCb);
+            // 生成查询字符串
+            let search = '';
+            search = url.indexOf('?') != -1 ? '' : '?';
+            for (let i in data) {
+                search += i + '=' + data[i] + '&';
+            }
+            search += 'callback=' + jsonpCb;
+            console.log(url + search);
+            // window.jsonpCb = fn;
+            // 为window添加全局函数，执行完callback函数后，立马删除script标签
+            window[jsonpCb] = function(data) {
+                fn(data);
+                window.document.body.removeChild(script);
+            }
+
+            var script = document.createElement('script');
+            script.src = url + search;
+            window.document.body.appendChild(script);
+        }
+        // {} == {}; // false;
+
+        // [] == []; // false;
+
+        // null == undefined; // true;
+        // 二分查找
+        function binary_search(arr, left, right, key) {
+            let m = left + (right - left) / 2;
+            if (arr[m] > key) return binary_search(arr, left, m - 1, key);
+            else if (arr[m] < key) return binary_search(arr, m + 1, right, key);
+            else return m;
+        }
+
+        function binary_search(arr, left, right, key) {
+            while (left <= right) {
+                let m = left + (right - left) / 2;
+                if (arr[m] > key) right = m - 1;
+                else if (arr[m] < key) left = m + 1;
+                else return m;
+            }
+        }
+        // 递归查找DOM节点下有className的元素，并返回
+        function queryClassName(node, classn) {
+            if (node.nodeType == 1 && node.className == classn) {
+                console.log(node);
+                return node;
+            }
+            if (node.nodeType == 1 && node.hasChildNodes) {
+                // console.log(111);
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    let temp = queryClassName(node.childNodes[i], classn);
+                    if (temp) {
+                        return temp;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 找出下列正数组的最大差值
+        function getMax(arr) {
+            var m = arr[0];
+            var M = arr[0];
+            for (let i = 1; i < arr.length; i++) {
+                M = Math.max(M, arr[i]);
+                m = Math.min(m, arr[i]);
+            }
+            return M - m;
+        }
+        // 判断回文串
+        function checkH(str) {
+            return str === str.split('').reverse().join('');
+        }
+
+        // 数组去重；统计出现次数最多的 -- 都是用object
+        function set(arr) {
+            let temp = [];
+            let obj = {};
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i] in obj) {
+                    obj[arr[i]]++;
+                } else {
+                    obj[arr[i]] = 0;
+                    temp.push(arr[i]);
+                }
+            }
+            return temp;
+        }
+
+        function getN(num) {
+            let obj = {};
+            let n = 0;
+            while (true) {
+                n = getRandom(0, 100);
+                if (!(n in obj)) {
+                    obj[n] = 0;
+                }
+                if (Object.keys(obj).length === num) {
+                    return Object.keys(obj);
+                }
+            }
+        }
+
+
+        // 快排
+        function swap(arr, i, j) {}
+
+        function quick_sort(arr, left, right) {
+            if (left >= right) {
+                return;
+            }
+            let i = left,
+                j = right;
+            let x = arr[i];
+            while (i < j) {
+                while (i < j && arr[j] >= x) {
+                    --j;
+                }
+                while (i < j && arr[i] <= x) {
+                    ++i;
+                }
+                if (i < j) {
+                    swap(arr, i, j);
+                }
+            }
+            swap(arr, left, i);
+            quick_sort(arr, left, i - 1);
+            quick_sort(arr, i + 1, j);
+        }
+
+
+
+
+        // 遍历DOM节点
+        function traverse(node) {
+            if (node.nodeType == 1) {
+                console.log(node.nodeName);
+            }
+            if (node.hasChildNodes) {
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    traverse(node.childNodes[i]);
+                }
+            }
+        }
+
+
+
+
+        function getRandom(minNum, maxNum) {
+            return Math.floor(Math.random() * (maxNum - minNum)) + minNum;
+        }
+        // 随机生成index，当前元素和index位置元素进行swap
+        let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let n = 0;
+        for (let i = 0; i < arr.length; i++) {
+            n = getRandom(0, arr.length - 1);
+            let temp = arr[i];
+            arr[i] = n;
+            arr[n] = temp;
+        }
+
+        console.log(arr);
+
+
+
+        let transf = {
+            '清': '清',
+            '華': '华',
+            '學': '学'
+        };
+
+        let search = '';
+        $$.click('sendMail', function() {
+            search = $$.$id('mail').value;
+            console.log(search);
+            // console.log(search.split(''));
+            search = search.split('');
+            // console.log(search.join(''));
+            // console.log(search[1] in transf);
+            for (let i = 0; i < search.length; i++) {
+                if (search[i] in transf) {
+                    search[i] = transf[search[i]];
+                    // console.log(search[i]);
+                    // console.log(transf[search[i]]);
+                }
+            }
+            // search.join('');
+            // console.log(typeof search);
+            // console.log(search instanceof Array);
+            search = search.join('');
+            console.log(search);
+        })
+
+        console.log(search);
+
+        // const punycode = require('punycode');
+
+
+
+        var count = 10;
+        $$.click('btn1', function() {
+            var li = document.createElement('li');
+            li.innerHTML = count++;
+            $$.$id('ul').appendChild(li);
+        })
+
+        $$.click('btn2', function() {
+            $$.$id('ul').removeChild($$.$id('ul').children[0]);
+        })
+
+
+        // 事件委托
+        $$.click('ul', clickF);
+        un('ul', 'click', clickF);
+
+        function clickF(e) {
+            // var event = $$.getEvent(e);
+            var target = $$.getTarget(event);
+            // 判断孩子，执行操作
+            if (target.nodeName === 'LI') {
+                console.log(target);
+            }
+        }
+        // 这里的click事件绑定不到上面新创建的li元素
+        // var lis = $$.$tag('li');
+        // for (var i = 0; i < lis.length; i++) {
+        //     lis[i].onclick = function(e) {
+        //         console.log(this);
+        //         $$.stopPropagation(e);
+        //     }
+        // }
+
+        // $$.$id('ul').onclick = function() {
+        //     console.log('ul被点击');
+        // }
+        $$.click('btn', function(e) {
+            // alert(arguments.length);
+            // console.log(arguments);
+            // console.log(typeof arguments)
+            // console.log(e.target);
+            // console.log(getTarget(e));
+            // console.log(getEvent(e)); 
+            // console.log($$.getEvent(e));
+            // console.log($$.getTarget(e));
+            alert(111);
+        });
+        // var box = document.getElementById('box');
+        // box.addEventListener('click', function() {
+        //     this.style.background = 'blue';
+        // })
+        // var box = $$.$id('box');
+        // $$.on(box, 'click', function() {
+        //     this.style.background = 'blue';
+        // })
+        // $$.click(box, function() {
+        //     this.style.background = 'blue';
+        // })
+
+        // hover('box', function() {
+        //     this.style.background = 'blue';
+        // }, function() {
+        //     this.style.background = 'yellow';
+        // });
+        // mouseover('box', function() {
+        //     this.style.background = 'yellow';
+        // }
+        function stopPropagation(e) {
+            var event = $$.getEvent(e);
+            if (event.stopPropagation) {
+                event.stopPropagation();
+            } else {
+                event.cancelBubble = true;
+            }
+        }
+
+        function preventDefault(e) {
+            var event = $$.getEvent(e);
+            if (event.preventDefault) {
+                event.preventDefault();
+            } else {
+                event.returnValue = false;
+            }
+        }
+        // 获取事件event对象
+        function getEvent(e) {
+            return e ? e : window.event;
+        }
+        // 获取事件event对象目标元素
+        function getTarget(e) {
+            var event = getEvent(e);
+            return event.target || event.srcElement;
+        }
+
+        function mouseover(id, fn) {
+            $$.on(id, 'mouseover', fn);
+        }
+
+        function hover(id, fnover, fnout) {
+            if (fnover) {
+                $$.on(id, 'mouseover', fnover);
+            }
+            if (fnout) {
+                $$.on(id, 'mouseout', fnout);
+            }
+        }
+
+        function click(id, fn) {
+            $$.on(id, 'click', fn);
+        }
+
+        function extend(tar, source) {
+            for (var i in source) {
+                tar[i] = source[i];
+            }
+            return tar;
+        }
+        // var aa = {};
+        // extend(aa, {
+        //     sayHi: function() {
+        //         alert('hi');
+        //     },
+        //     a: 'aaa'
+        // })
+    </script>
+</body>
+
+</html>

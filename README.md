@@ -12,10 +12,34 @@
 ## 引包
 
 ```
-<script src="./source/lucky.js"></script>
+<script src="./lucky.js"></script>
 ```
 
 ## 暴露的接口
+
+
+### 选择器接口：
+
+```
+// 获取id的DOM
+$$.$id(id)
+// 缩小搜索范围; tag和id
+$$.$tag(tag, id)
+$$.$class(classname, id)
+// 分组选择器
+$$.$group(str) 
+// 使用querySelectorAll，可以selector分组/层次
+$$.$all(selector, id)
+```
+
+使用举例：
+
+```
+let elements = $$.$all('.box1 span', 'container');
+for (let i = 0; i < elements.length; i++) {
+    elements[i].style.border = '1px solid red';
+}
+```
 
 ### 事件接口：
 
@@ -44,30 +68,17 @@ $$.$stopPropagation(e)
 $$.$delegate(pid, eventType, selector, fn)
 ```
 
-### 选择器接口：
+### 类型判断
 
 ```
-// 获取id的DOM
-$$.$id(id)
-// 缩小搜索范围; tag和id
-$$.$tag(tag, id)
-$$.$class(classname, id)
-// 分组选择器
-$$.$group(str) 
-// 使用querySelectorAll，可以selector分组/层次
-$$.$all(selector, id)
+isNumber(val)
+isBoolean(val)
+isString(val)
+isUndefined(val)
+isObj(val)
+isNull(val)
+isArray(val)
 ```
-
-使用举例：
-
-```
-let elements = $$.$all('.box1 span', 'container');
-for (let i = 0; i < elements.length; i++) {
-    elements[i].style.border = '1px solid red';
-}
-```
-
-下面使用$$.css()更简单
 
 ### CSS接口
 

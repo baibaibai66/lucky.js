@@ -1,4 +1,4 @@
-# lucky.js框架说明
+html(context, value)# lucky.js框架说明
 
 菜鸟一枚，为了练习JavaScript，跟着牛人尝试着利用原生js封装一个**类似jQuery**一样的框架，方便使用，顺便解决一下可能存在的兼容性问题。如有缘能看到此文章，欢迎批评指正。
 
@@ -9,13 +9,15 @@
 > 2. 封装框架
 > 3. 描述数据
 
-[TOC]
-
 ## 引包
 
 ```
 <script src="./lucky.js"></script>
 ```
+
+**注意**：为了方便书写，对传入参数context跟jQuery统一，只能传入字符串。
+
+#id/.class/tag 或者是 分组+层次的形式，因为其实现用的是`querySelectorAll`
 
 ## 暴露的接口
 
@@ -121,7 +123,23 @@ $$.hide(context)
 
 ### 属性框架
 
+```
+// 类似jQuery的attr获取/设置属性
+$$.attr(context, key, value)
+// 删除元素的某个classname 
+$$.removeClass(context, name)
+// 添加classs属性
+$$.addClass(context, name)
+// 判断是否存在class属性的某个name
+$$.hasClass(context, name)
+```
+
 ### 内容框架
+
+```
+// 获取内容
+$$.html(context, value)
+```
 
 ### 缓存
 

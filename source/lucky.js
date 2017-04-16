@@ -193,6 +193,21 @@ $$.extend($$, {
         return str.replace(/@\((\w+)\)/g, function(match, key) {
             return typeof data[key] === "undefined" ? '' : data[key]
         });
+    },
+    //arttemplate语法
+    //封装成一个函数
+    bindTemplate: function(data, divid, Template) {
+        //alert(divid);
+        //alert(Template);
+        var html = template(Template, data);
+        document.getElementById(divid).innerHTML = html;
+    },
+
+    //三个参数
+    artTemplate: function(id, html, data) {
+        var render = template.compile(html);
+        var str = render(data)
+        document.getElementById(id).innerHTML = str;
     }
 });
 // 日期操作
@@ -505,6 +520,88 @@ $$.extend($$, {
         return {
             left: absoluteLeft(id),
             top: absoluteTop(id)
+        }
+    }
+});
+// 属性框架
+$$.extend($$, {
+    // 注意：以后写的框架中context传入跟jQuery统一，只能传入字符串，#id/.class/tag
+    // 类似jQuery的attr获取/设置属性
+    attr: function(context, key, value) {
+        let doms = $$.isString(context) ? $$.$all(context) : context;
+        // 设置属性
+        if (value) {
+            for (let i = 0; i < doms.length; i++) {
+                doms[i].setAttribute(key, value);
+            }
+        }
+        // 读取属性
+        else {
+            return doms[0].getAttribute(key);
+        }
+    },
+    // 判断是否存在class属性的某个name
+    hasClass: function(context, name) {
+        let doms = $$.isString(context) ? $$.$all(context) : context;
+        let flag = false;
+        let len = doms.length
+            // context传进来的是一个DOM元素，不是数组
+        if (len === undefined) {
+            return checkClass(doms, name);
+        }
+        // 如果有多个dom元素，只要有一个的class里面有classname即可
+        for (let i = 0; i < len; i++) {
+            if (checkClass(doms[i], name)) {
+                flag = true;
+            }
+        }
+        return flag;
+
+        function checkClass(dom, name) {
+            let classname = ' ' + dom.className + ' ';
+            name = ' ' + name.trim() + ' ';
+            return classname.indexOf(name) > -1;
+
+            // if (classname.indexOf(name) === -1) {
+            //     return false;
+            // }
+            // else {
+            //     return true;
+            // }
+        }
+    },
+    // 添加classs属性
+    addClass: function(context, name) {
+        let doms = $$.isString(context) ? $$.$all(context) : context;
+        for (let i = 0; i < doms.length; i++) {
+            // 判断元素class属性是否已经存在该classname
+            if (!$$.hasClass([doms[i]], name)) {
+                doms[i].className += ' ' + name;
+            }
+        }
+    },
+    // 删除元素的某个classname 
+    removeClass: function(context, name) {
+        let doms = $$.isString(context) ? $$.$all(context) : context;
+        for (let i = 0; i < doms.length; i++) {
+            let classname = ' ' + doms[i].className + ' ';
+            let localname = ' ' + name + ' ';
+            doms[i].className = classname.replace(localname, '').trim();
+
+        }
+    }
+});
+// 获取内容
+$$.extend($$, {
+    // 获取内容
+    html: function(context, value) {
+        let doms = $$.$all(context);
+        if (value) {
+            for (let i = 0, len = doms.length; i < len; i++) {
+                doms[i].innerHTML = value;
+            }
+        } else {
+            return doms[0].innerHTML;
         }
     }
 })

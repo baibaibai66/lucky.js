@@ -15,7 +15,7 @@
 <script src="./lucky.js"></script>
 ```
 
-**注意**：为了方便书写，对传入参数context跟jQuery统一，只能传入字符串。
+**注意**：为了方便书写，对传入参数context跟jQuery统一，只能传入字符串，就别传DOM了。
 
 #id/.class/tag 或者是 分组+层次的形式，因为其实现用的是`querySelectorAll`
 

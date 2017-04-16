@@ -1,4 +1,4 @@
-html(context, value)# lucky.js框架说明
+# lucky.js框架说明
 
 菜鸟一枚，为了练习JavaScript，跟着牛人尝试着利用原生js封装一个**类似jQuery**一样的框架，方便使用，顺便解决一下可能存在的兼容性问题。如有缘能看到此文章，欢迎批评指正。
 

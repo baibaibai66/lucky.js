@@ -1,13 +1,7 @@
-// **** 解决污染 -- 立即函数 + 闭包 ****
-(function(window) {
+// 立即函数 -- 模块化
+(function(w) {
     // 顶级模块
-    // **** jQuery('selector')形式 + 链式访问 ****
-    var lucky = function(context) {
-        this.elements = [];
-        if (context) {
-            return this.$all(context);
-        }
-    }
+    var lucky = function() {};
     lucky.prototype = {
         // 后面对象拷贝给前面；新增拷贝；该方法为了模块化
         extend: function(target, source) {
@@ -15,83 +9,18 @@
                 target[i] = source[i];
             }
             return target;
-        },
-        // all改造完成
-        $all: function(selector) {
-            this.elements = document.querySelectorAll(selector);
-            // console.log(this.elements);
-            return this;
-        },
-        css: function(key, value) {
-            let doms = this.elements;
-            if (doms.length) {
-                // 对key进行检测
-                let index = key.indexOf('-');
-                if (index === -1) {
-                    key[index] = '';
-                    key[index + 1].toUpperCase();
-                }
-                // 设置
-                if (value) {
-                    for (let i = 0, len = doms.length; i < len; i++) {
-                        doms[i].style[key] = value;
-                    }
-                }
-                // 获取
-                else {
-                    if (doms[0].currentStyle) {
-                        return doms[0].currentStyle[key];
-                    } else {
-                        return window.getComputedStyle(doms[0], null)[key];
-                    }
-                }
-            }
-            return this;
-        },
-        // 显示
-        show: function() {
-            return this.css('display', 'block');
-        },
-        // 隐藏
-        hide: function() {
-            return this.css('display', 'none');
-        },
-        attr: function(key, value) {
-            let doms = this.elements;
-            // 设置属性
-            if (value) {
-                for (let i = 0; i < doms.length; i++) {
-                    doms[i].setAttribute(key, value);
-                }
-            }
-            // 读取属性
-            else {
-                return doms[0].getAttribute(key);
-            }
-
-            return this;
         }
     };
-
-    // 这样的实例化无法传参
-    // $$ = new lucky();
-    // 同样是实例化，改用函数形式 -- 也就是需要的jQuery形式了
-    // **** jQuery('selector')形式 + 链式访问 ****
-    window.$$ = function(context) {
-        return new lucky(context);
-    };
-
-    window.Lucky = new lucky();
-
+    w.$$ = new lucky();
 
     // 基础模块
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
 
     });
     // ajax框架
-    Lucky.extend(Lucky, {});
+    $$.extend($$, {});
     // 选择框架
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         // 获取id的DOM
         $id: function(id) {
             return document.getElementById(id);
@@ -99,7 +28,7 @@
         // 缩小搜索范围; tag和id
         $tag: function(tag, id) {
             if (typeof id == 'string') {
-                id = Lucky.$id(id);
+                id = $$.$id(id);
             }
             if (id) {
                 return id.getElementsByTagName(tag);
@@ -113,8 +42,8 @@
         $class: function(classname, id) {
             let arr = [];
             // 1. 判断id的类型 -- string or dom
-            if (Lucky.isString(id)) {
-                id = Lucky.$id(id);
+            if ($$.isString(id)) {
+                id = $$.$id(id);
             }
             // 2. 根据id是否存在来决定是否缩小范围
             // 如果id不存在，还是在document层面去遍历
@@ -159,12 +88,12 @@
                 // 如果首字符是.或者#，去掉
                 let name = item.substr(1);
                 if (first === '.') {
-                    list = Lucky.$class(name);
+                    list = $$.$class(name);
                     // console.log(list);
                 } else if (first === '#') {
-                    list = [Lucky.$id(name)];
+                    list = [$$.$id(name)];
                 } else {
-                    list = Lucky.$tag(item);
+                    list = $$.$tag(item);
                 }
                 pushArr(list);
             }
@@ -189,17 +118,17 @@
         // 层次选择器，有问题...
         $cengci: function(select) {
             //个个击破法则 -- 寻找击破点
-            var sel = Lucky.trim(select).split(' ');
+            var sel = $$.trim(select).split(' ');
             var result = [];
             var context = [];
             for (var i = 0, len = sel.length; i < len; i++) {
                 result = [];
-                var item = Lucky.trim(sel[i]);
+                var item = $$.trim(sel[i]);
                 var first = sel[i].charAt(0)
                 var index = item.indexOf(first)
                 if (first === '#') {
                     //如果是#，找到该元素，
-                    pushArray([Lucky.$id(item.slice(index + 1))]);
+                    pushArray([$$.$id(item.slice(index + 1))]);
                     context = result;
                 } else if (first === '.') {
                     //如果是.
@@ -207,11 +136,11 @@
                     //找到context中所有的class为【s-1】的元素 --context是个集合
                     if (context.length) {
                         for (var j = 0, contextLen = context.length; j < contextLen; j++) {
-                            // Lucky.$class第二个参数是id，所以这里有问题
-                            pushArray(Lucky.$class(item.slice(index + 1), context[j]));
+                            // $$.$class第二个参数是id，所以这里有问题
+                            pushArray($$.$class(item.slice(index + 1), context[j]));
                         }
                     } else {
-                        pushArray(Lucky.$class(item.slice(index + 1)));
+                        pushArray($$.$class(item.slice(index + 1)));
                     }
                     context = result;
                 } else {
@@ -219,10 +148,10 @@
                     //遍历父亲，找到父亲中的元素==父亲都存在context中
                     if (context.length) {
                         for (var j = 0, contextLen = context.length; j < contextLen; j++) {
-                            pushArray(Lucky.$tag(item, context[j]));
+                            pushArray($$.$tag(item, context[j]));
                         }
                     } else {
-                        pushArray(Lucky.$tag(item));
+                        pushArray($$.$tag(item));
                     }
                     context = result;
                 }
@@ -241,7 +170,7 @@
         // $all('#id') $all('.classname') $all('#id .calss tag')  
         $all: function(selector, id) {
             if (id) {
-                id = Lucky.isString(id) ? Lucky.$id(id) : id;
+                id = $$.isString(id) ? $$.$id(id) : id;
                 return id.querySelectorAll(selector);
             } else {
                 return document.querySelectorAll(selector);
@@ -249,7 +178,7 @@
         }
     });
     // 字符串操作
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         //去除左边空格
         ltrim: function(str) {
             return str.replace(/(^\s*)/g, '');
@@ -284,21 +213,21 @@
         }
     });
     // 日期操作
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
 
     });
     // 数组操作
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
 
     });
     // 数字相关操作模块
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         random: function(begin, end) {
             return Math.floor(Math.random() * (end - begin)) + begin;
         }
     });
     // 判断数据类型
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         isNumber: function(val) {
             return typeof val === 'number' && isFinite(val)
         },
@@ -328,36 +257,36 @@
         }
     });
     // 事件模块
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         // 绑定事件
         on: function(id, type, fn) {
-            let dom = Lucky.isString(id) ? document.getElementById(id) : id;
+            let dom = $$.isString(id) ? document.getElementById(id) : id;
             dom.addEventListener(type, fn, false);
         },
         // 解绑事件
         un: function(id, type, fn) {
-            let dom = Lucky.isString(id) ? Lucky.$id(id) : id;
+            let dom = $$.isString(id) ? $$.$id(id) : id;
             dom.removeEventListener(type, fn, false);
         },
         // 鼠标点击
         click: function(id, fn) {
-            Lucky.on(id, 'click', fn);
+            $$.on(id, 'click', fn);
         },
         // 鼠标移入
         mouseover: function(id, fn) {
-            Lucky.on(id, 'mouseover', fn);
+            $$.on(id, 'mouseover', fn);
         },
         // 鼠标离开
         mouseout: function(id, fn) {
-            Lucky.on(id, 'mouseout', fn);
+            $$.on(id, 'mouseout', fn);
         },
         // 鼠标悬浮
         hover: function(id, fnover, fnout) {
             if (fnover) {
-                Lucky.on(id, 'mouseover', fnover);
+                $$.on(id, 'mouseover', fnover);
             }
             if (fnout) {
-                Lucky.on(id, 'mouseout', fnout);
+                $$.on(id, 'mouseout', fnout);
             }
         },
         // 获取事件event对象
@@ -371,7 +300,7 @@
         },
         // 阻止元素事件默认行为
         preventDefault: function(e) {
-            var event = Lucky.getEvent(e);
+            var event = $$.getEvent(e);
             if (event.preventDefault) {
                 event.preventDefault();
             } else {
@@ -380,7 +309,7 @@
         },
         // 阻止事件冒泡
         stopPropagation: function(e) {
-            var event = Lucky.getEvent(e);
+            var event = $$.getEvent(e);
             if (event.stopPropagation) {
                 event.stopPropagation();
             } else {
@@ -390,10 +319,10 @@
         //事件委托 -- 直接拿过来的
         delegate: function(pid, eventType, selector, fn) {
             //参数处理
-            var parent = Lucky.$id(pid);
+            var parent = $$.$id(pid);
 
             function handle(e) {
-                var target = Lucky.GetTarget(e);
+                var target = $$.GetTarget(e);
                 if (target.nodeName.toLowerCase() === selector || target.id === selector || target.className.indexOf(selector) != -1) {
                     // 在事件冒泡的时候，回以此遍历每个子孙后代，如果找到对应的元素，则执行如下函数
                     // 为什么使用call，因为call可以改变this指向
@@ -408,21 +337,21 @@
         }
     });
     // css框架
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         // setStyle('ul li', 'border', '1px solid yellow');
         // 设置样式
         setStyle: function(context, key, value) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             for (let i = 0, len = doms.length; i < len; i++) {
                 doms[i].style[key] = value;
             }
         },
         // 原生获取样式，有问题。动态添加的样式，无法获取
         // 获取样式，默认只能一个一个的设置
-        // 使用：getStyle(Lucky.$all('ul li.current'), 'color')
+        // 使用：getStyle($$.$all('ul li.current'), 'color')
         // getStyle('#ul li', 'backgroundColor')
         getStyle: function(context, key) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             // IE
             if (doms[0].currentStyle) {
                 return doms[0].currentStyle[key];
@@ -434,7 +363,7 @@
         // 2. 传递三个参数：设置
         // 各个击破 context字符串和dom都可以
         css: function(context, key, value) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             // console.log(arguments.callee.length)
             // console.log(doms.length);
             if (doms.length) {
@@ -448,43 +377,43 @@
                 if (value) {
                     // value == backgroundColor / backgroud-color
 
-                    Lucky.setStyle(doms, key, value)
+                    $$.setStyle(doms, key, value)
                 }
                 // 获取
                 else {
-                    return Lucky.getStyle(doms, key)
+                    return $$.getStyle(doms, key)
                 }
             }
         },
         // 显示
         show: function(context) {
-            Lucky.css(context, 'display', 'block');
+            $$.css(context, 'display', 'block');
         },
         // 隐藏
         hide: function(context) {
-            Lucky.css(context, 'display', 'none');
+            $$.css(context, 'display', 'none');
         },
         // 元素高度宽度概述
         // 计算方式：clientHeight clientWidth innerWidth innerHeight
         // 元素的实际高度+border，也不包含滚动条
         offsetWidth: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.offsetWidth;
         },
 
         offsetHeight: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.offsetHeight;
         },
 
         // 元素的实际高度 + border， 也不包含滚动条
         clientWidth: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.clientWidth;
         },
 
         clientHeight: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.clientHeight;
         },
 
@@ -492,22 +421,22 @@
         //    当元素出现滚动条时候，这里的高度有两种：可视区域的高度 实际高度（可视高度+不可见的高度）
         //    计算方式 scrollwidth
         scrollHeight: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.scrollHeight;
         },
 
         scrollWidth: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.scrollWidth;
         },
         // 滚动高度，相对于元素左上角
         scrollTop: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.scrollTop;
         },
 
         scrollLeft: function(id) {
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return id.scrollLeft;
         },
         //获取屏幕的高度和宽度
@@ -553,7 +482,7 @@
                 return id.offsetTop;
             }
 
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return {
                 left: offsetLeft(id),
                 top: offsetTop(id)
@@ -571,25 +500,25 @@
         //只需通过while循环不断获取offsetParent的offsetLeft/offsetTop直到offsetParent = null为止。
         absoluteOffset: function(id) {
             function absoluteLeft(id) {
-                let left = Lucky.offset(id).left;
+                let left = $$.offset(id).left;
                 let parent = id.offsetParent;
                 while (parent) {
-                    left += Lucky.offset(parent).left;
+                    left += $$.offset(parent).left;
                     parent = parent.offsetParent;
                 }
                 return left;
             }
 
             function absoluteTop(id) {
-                let top = Lucky.offset(id).top;
+                let top = $$.offset(id).top;
                 let parent = id.offsetParent;
                 while (parent) {
-                    top += Lucky.offset(parent).top;
+                    top += $$.offset(parent).top;
                     parent = parent.offsetParent;
                 }
                 return top;
             }
-            id = Lucky.isString(id) ? Lucky.$id(id) : id;
+            id = $$.isString(id) ? $$.$id(id) : id;
             return {
                 left: absoluteLeft(id),
                 top: absoluteTop(id)
@@ -597,11 +526,11 @@
         }
     });
     // 属性框架
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         // 注意：以后写的框架中context传入跟jQuery统一，只能传入字符串，#id/.class/tag
         // 类似jQuery的attr获取/设置属性
         attr: function(context, key, value) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             // 设置属性
             if (value) {
                 for (let i = 0; i < doms.length; i++) {
@@ -615,7 +544,7 @@
         },
         // 判断是否存在class属性的某个name
         hasClass: function(context, name) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             let flag = false;
             let len = doms.length
                 // context传进来的是一个DOM元素，不是数组
@@ -645,17 +574,17 @@
         },
         // 添加classs属性
         addClass: function(context, name) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             for (let i = 0; i < doms.length; i++) {
                 // 判断元素class属性是否已经存在该classname
-                if (!Lucky.hasClass([doms[i]], name)) {
+                if (!$$.hasClass([doms[i]], name)) {
                     doms[i].className += ' ' + name;
                 }
             }
         },
         // 删除元素的某个classname 
         removeClass: function(context, name) {
-            let doms = Lucky.isString(context) ? Lucky.$all(context) : context;
+            let doms = $$.isString(context) ? $$.$all(context) : context;
             for (let i = 0; i < doms.length; i++) {
                 let classname = ' ' + doms[i].className + ' ';
                 let localname = ' ' + name + ' ';
@@ -665,10 +594,10 @@
         }
     });
     // 获取内容
-    Lucky.extend(Lucky, {
+    $$.extend($$, {
         // 获取内容
         html: function(context, value) {
-            let doms = Lucky.$all(context);
+            let doms = $$.$all(context);
             if (value) {
                 for (let i = 0, len = doms.length; i < len; i++) {
                     doms[i].innerHTML = value;
@@ -678,16 +607,18 @@
             }
         },
         empty: function(context) {
-            let doms = Lucky.$all(context);
+            let doms = $$.$all(context);
             for (let i = 0; i < doms.length; i++) {
                 doms[i].innerHTML = '';
             }
         },
         remove: function(context) {
-            let doms = Lucky.$all(context);
+            let doms = $$.$all(context);
             for (let i = 0; i < doms.length; i++) {
                 doms[i].parentNode.removeChild(doms[i]);
             }
         }
     })
+
+    // window.$$ = window.luckys = $$;
 })(window);

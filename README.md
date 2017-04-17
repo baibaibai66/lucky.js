@@ -103,13 +103,13 @@ Lucky.$delegate(pid, eventType, selector, fn)
 ### 类型判断
 
 ```
-isNumber(val)
-isBoolean(val)
-isString(val)
-isUndefined(val)
-isObj(val)
-isNull(val)
-isArray(val)
+Lucky.isNumber(val)
+Lucky.isBoolean(val)
+Lucky.isString(val)
+Lucky.isUndefined(val)
+Lucky.isObj(val)
+Lucky.isNull(val)
+Lucky.isArray(val)
 ```
 
 ### CSS接口
